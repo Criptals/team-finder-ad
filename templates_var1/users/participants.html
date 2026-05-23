@@ -38,7 +38,7 @@
                     Участники моих проектов
                 </a>
                 {% if active_filter %}
-                <a href="/users/list" class="filter-reset">Сбросить</a>
+                <a href="/users/list/" class="filter-reset">Сбросить</a>
                 {% endif %}
             </div>
         </div>
@@ -56,36 +56,41 @@
                 {% endif %}
             </div>
             <div class="participant-info">
-                <h3 class="participant-name">{{ participant.name }} {{ participant.surname }}</h3>
-                <p class="participant-role">{{ participant.about|truncatechars:80 }}</p>
+                <h3 class="participant-name">{{ participant.first_name }} {{ participant.last_name }}</h3>
+                
+                <p class="participant-role">{{ participant.bio|truncatechars:80|default:"Нет описания" }}</p>
             </div>
             <div class="participant-card-footer">
-                <a href="/users/{{ participant.id }}" class="white-button">
+                <a href="{% url 'users:public_profile' pk=participant.pk %}" class="white-button">
                     {% include 'includes/svg/eye.html' %} Посмотреть контакты
                 </a>
             </div>
         </div>
         {% endfor %}
     </div>
+
     {% if page_obj.has_other_pages %}
     <div class="pagination">
         {% if page_obj.has_previous %}
-        <a href="?{{ query_prefix }}page={{ page_obj.previous_page_number }}" class="page-btn">←</a>
+            <a href="?filter={{ active_filter }}&page={{ page_obj.previous_page_number }}" class="page-btn">←</a>
         {% endif %}
+        
         {% for num in page_obj.paginator.page_range %}
-        {% if page_obj.number == num %}
-        <span class="page-btn active">{{ num }}</span>
-        {% else %}
-        <a href="?{{ query_prefix }}page={{ num }}" class="page-btn">{{ num }}</a>
-        {% endif %}
+            {% if page_obj.number == num %}
+                <span class="page-btn active">{{ num }}</span>
+            {% else %}
+                <a href="?filter={{ active_filter }}&page={{ num }}" class="page-btn">{{ num }}</a>
+            {% endif %}
         {% endfor %}
+        
         {% if page_obj.has_next %}
-        <a href="?{{ query_prefix }}page={{ page_obj.next_page_number }}" class="page-btn">→</a>
+            <a href="?filter={{ active_filter }}&page={{ page_obj.next_page_number }}" class="page-btn">→</a>
         {% endif %}
     </div>
     {% endif %}
+
     {% else %}
-    {% include 'includes/empty-project-card.html' with empty_title="Пока нет участников" empty_message="Попробуйте сбросить фильтр" button_link="/users/list" button_text="Сбросить" %}
+        {% include 'includes/empty-project-card.html' with empty_title="Пока нет участников" empty_message="Попробуйте сбросить фильтр или зарегистрируйтесь сами!" button_link="/users/list/" button_text="Сбросить" %}
     {% endif %}
 </div>
 {% endblock %}

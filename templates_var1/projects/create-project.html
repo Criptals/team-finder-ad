@@ -1,53 +1,58 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{% if is_edit %}Редактирование проекта{% else %}Создание проекта{% endif %}{% endblock %}
+{% block title %}{% if object %}Редактирование проекта{% else %}Создание проекта{% endif %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/auth.css' %}">
-<link rel="stylesheet" href="{% static 'css/profile_edit.css' %}">
 <link rel="stylesheet" href="{% static 'css/create-project.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="project-create-container">
-  <h2 class="form-title">{% if is_edit %}Редактирование проекта{% else %}Создание проекта{% endif %}</h2>
+  <h2 class="form-title">{% if object %}Редактирование проекта{% else %}Создание проекта{% endif %}</h2>
+  
   <form method="post" class="project-create-form">
     {% csrf_token %}
 
     <div class="form-field">
-      {{ form.name.label_tag }}
-      {{ form.name }}
+      {{ form.title.label_tag }}
+      {{ form.title }}
+      {% if form.title.errors %}
+        <span style="color: red;">{{ form.title.errors }}</span>
+      {% endif %}
     </div>
 
     <div class="form-field">
       {{ form.description.label_tag }}
       {{ form.description }}
-    </div>
-
-    <div class="form-field">
-      {{ form.github_url.label_tag }}
-      {{ form.github_url }}
+      {% if form.description.errors %}
+        <span style="color: red;">{{ form.description.errors }}</span>
+      {% endif %}
     </div>
 
     <div class="form-field">
       {{ form.status.label_tag }}
       {{ form.status }}
+      {% if form.status.errors %}
+        <span style="color: red;">{{ form.status.errors }}</span>
+      {% endif %}
     </div>
 
-    {% if form.errors %}
+    {% if form.non_field_errors %}
     <div class="form-errors">
-      {% for field, errors in form.errors.items %}
-      {% for error in errors %}
-      <p>{{ error }}</p>
-      {% endfor %}
+      {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
       {% endfor %}
     </div>
     {% endif %}
 
     <div class="form-actions">
-      <a href="/" class="cancel-button">Отмена</a>
-      <button type="submit" class="save-button">{% if is_edit %}Сохранить{% else %}Опубликовать{% endif %}</button>
+      <a href="{% if object %}{% url 'projects:detail' pk=object.pk %}{% else %}/{% endif %}" class="cancel-button">Отмена</a>
+      
+      <button type="submit" class="save-button">
+        {% if object %}Сохранить изменения{% else %}Опубликовать{% endif %}
+      </button>
     </div>
   </form>
 </div>

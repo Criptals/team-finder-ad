@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Профиль пользователя{% endblock %}
+{% block title %}Профиль {% if profile_user.first_name %}{{ profile_user.first_name }}{% else %}Пользователя{% endif %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/project_list.css' %}">
@@ -14,43 +14,50 @@
 <div class="profile-container">
     <div class="profile-header">
         <div class="profile-info">
-            {% if user.avatar %}
-                <img src="{{ user.avatar.url }}" alt="Аватар" class="profile-avatar">
+            {% if profile_user.avatar %}
+                <img src="{{ profile_user.avatar.url }}" alt="Аватар" class="profile-avatar">
             {% else %}
                 <img src="{% static 'images/default-avatar.png' %}" alt="Аватар по умолчанию" class="profile-avatar">
             {% endif %}
+            
             <div class="profile-details">
-                <h2 class="profile-name">{{ user.name }} {{ user.surname }}</h2>
+                <h2 class="profile-name">{{ profile_user.first_name }} {{ profile_user.last_name }}</h2>
+                
                 <p class="profile-description">
-                    {{ user.about|default:"Описание профиля пока не добавлено." }}
+                    {{ profile_user.bio|default:"Описание профиля пока не добавлено." }}
                 </p>
+                
                 <div class="profile-contacts">
-                    {% if user.email %}
-                    <span>{% include 'includes/svg/email.html' %} {{ user.email }}</span>
+                    {% if profile_user.email %}
+                    <span>{% include 'includes/svg/email.html' %} {{ profile_user.email }}</span>
                     {% endif %}
-                    {% if user.phone %}
-                    <span>{% include 'includes/svg/phone.html' %} {{ user.phone }}</span>
+                    
+                    {% if profile_user.phone %}
+                    <span>{% include 'includes/svg/phone.html' %} {{ profile_user.phone }}</span>
                     {% endif %}
-                    {% if user.github_url %}
+                    
+                    {% if profile_user.github %}
                     <span>{% include 'includes/svg/github.html' %}
-                        <a href="{{ user.github_url }}" target="_blank">GitHub</a>
+                        <a href="{{ profile_user.github }}" target="_blank">GitHub</a>
                     </span>
                     {% endif %}
                 </div>
             </div>
         </div>
+
         <div class="profile-actions">
             <a href="#"
                class="black-button black-button-share share-button"
-               data-url="/users/{{ user.id }}">
+               data-url="{{ request.build_absolute_uri }}">
                 {% include 'includes/svg/share.html' %}
             </a>
-            {% if request.user.id == user.id %}
-            <a href="/users/edit-profile" class="black-button">
+            
+            {% if request.user == profile_user %}
+            <a href="{% url 'users:profile_edit' %}" class="black-button">
                 {% include 'includes/svg/pen.html' %}
                 Редактировать
             </a>
-            <a href="/projects/create-project" class="black-button">
+            <a href="{% url 'projects:create' %}" class="black-button">
                 {% include 'includes/svg/plus.html' %}
                 Добавить проект
             </a>
@@ -58,18 +65,20 @@
         </div>
     </div>
 
-    <h3>Проекты ({{ user.owned_projects.all|length }})</h3>
+    <h3>Проекты ({{ profile_user.created_projects.all|length }})</h3>
 
     <div class="collapsed-project-grid">
-        {% for project in user.owned_projects.all %}
+        {% for project in profile_user.created_projects.all %}
         <div class="collapsed-project-card">
             <div class="collapsed-project-card-header">
-                <h4><a href="/projects/{{ project.id }}">{{ project.name }}</a></h4>
+                <h4><a href="{% url 'projects:detail' pk=project.pk %}">{{ project.title }}</a></h4>
                 <span class="project-status-black">
-                    {% if project.status == "open" %}
-                        Открыт
-                    {% elif project.status == "closed" %}
-                        Закрыт
+                    {% if project.status == "SEARCH" %}
+                        Поиск участников
+                    {% elif project.status == "IN_PROGRESS" %}
+                        В разработке
+                    {% elif project.status == "COMPLETED" %}
+                        Завершен
                     {% else %}
                         {{ project.status }}
                     {% endif %}
