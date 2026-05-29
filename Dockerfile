@@ -10,7 +10,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Создаем директорию для медиа файлов, если её нет
 RUN mkdir -p /app/media
 
 EXPOSE 8000

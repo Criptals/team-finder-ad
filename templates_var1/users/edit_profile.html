@@ -11,18 +11,18 @@
 {% block content %}
 <div class="profile-edit-container">
     <h2 class="form-title">Редактирование профиля</h2>
-    
+
     <form method="post" enctype="multipart/form-data" class="profile-edit-form">
         {% csrf_token %}
 
         <div class="avatar-upload">
             <div class="avatar-preview">
                 {% if form.instance.avatar %}
-                    <img src="{{ form.instance.avatar.url }}" alt="Аватар">
+                <img src="{{ form.instance.avatar.url }}" alt="Аватар пользователя">
                 {% else %}
-                    <img src="{% static 'images/default-avatar.png' %}" alt="Аватар по умолчанию">
+                <img src="{% static 'images/default-avatar.png' %}" alt="Аватар по умолчанию">
                 {% endif %}
-                
+
                 <div class="overlay">
                     <button type="button" onclick="document.getElementById('id_avatar').click()">Заменить</button>
                 </div>
@@ -32,42 +32,41 @@
 
         <div class="form-row">
             <div class="form-field">
-                {{ form.first_name.label_tag }}
-                {{ form.first_name }}
-                {% if form.first_name.errors %}
-                    <span class="error">{{ form.first_name.errors }}</span>
+                {{ form.name.label_tag }}
+                {{ form.name }}
+                {% if form.name.errors %}
+                <span class="error">{{ form.name.errors }}</span>
                 {% endif %}
             </div>
             <div class="form-field">
-                {{ form.last_name.label_tag }}
-                {{ form.last_name }}
-                {% if form.last_name.errors %}
-                    <span class="error">{{ form.last_name.errors }}</span>
+                {{ form.surname.label_tag }}
+                {{ form.surname }}
+                {% if form.surname.errors %}
+                <span class="error">{{ form.surname.errors }}</span>
                 {% endif %}
             </div>
         </div>
 
         <div class="form-field">
-            {{ form.bio.label_tag }}
-            {{ form.bio }}
-            {% if form.bio.errors %}
-                <span class="error">{{ form.bio.errors }}</span>
+            {{ form.about.label_tag }}
+            {{ form.about }}
+            {% if form.about.errors %}
+            <span class="error">{{ form.about.errors }}</span>
             {% endif %}
         </div>
-
         <div class="form-row">
             <div class="form-field">
                 {{ form.phone.label_tag }}
                 {{ form.phone }}
                 {% if form.phone.errors %}
-                    <span class="error">{{ form.phone.errors }}</span>
+                <span class="error">{{ form.phone.errors }}</span>
                 {% endif %}
             </div>
             <div class="form-field">
-                {{ form.github.label_tag }}
-                {{ form.github }}
-                {% if form.github.errors %}
-                    <span class="error">{{ form.github.errors }}</span>
+                {{ form.github_url.label_tag }}
+                {{ form.github_url }}
+                {% if form.github_url.errors %}
+                <span class="error">{{ form.github_url.errors }}</span>
                 {% endif %}
             </div>
         </div>
@@ -75,7 +74,7 @@
         {% if form.non_field_errors %}
         <div class="form-errors">
             {% for error in form.non_field_errors %}
-                <p>{{ error }}</p>
+            <p>{{ error }}</p>
             {% endfor %}
         </div>
         {% endif %}

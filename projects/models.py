@@ -2,23 +2,52 @@ from django.conf import settings
 from django.db import models
 
 class Project(models.Model):
-    STATUS_CHOICES = [
-        ('SEARCH', 'Поиск участников'),
-        ('IN_PROGRESS', 'В разработке'),
-        ('COMPLETED', 'Завершен'),
-    ]
+    class Status(models.TextChoices):
+        OPEN = 'open', 'Open'
+        CLOSED = 'closed', 'Closed'
 
-    title = models.CharField(max_length=255, verbose_name="Название")
-    description = models.TextField(verbose_name="Описание")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='SEARCH', verbose_name="Статус")
-    author = models.ForeignKey(
+    name = models.CharField(
+        max_length=200, 
+        verbose_name='Название проекта'
+    )
+    
+    description = models.TextField(
+        blank=True, 
+        null=True, 
+        verbose_name='Описание'
+    )
+    
+    owner = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
-        related_name='created_projects',
-        verbose_name="Автор"
+        related_name='owned_projects',
+        verbose_name='Владелец'
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True, 
+        verbose_name='Дата создания'
+    )
+    
+    github_url = models.URLField(
+        blank=True, 
+        null=True, 
+        verbose_name='Ссылка на GitHub'
+    )
+    
+    status = models.CharField(
+        max_length=6, 
+        choices=Status.choices,
+        default=Status.OPEN,
+        verbose_name='Статус'
+    )
+    
+    participants = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, 
+        related_name='participated_projects',
+        blank=True, 
+        verbose_name='Участники'
+    )
 
     class Meta:
         ordering = ['-created_at']
@@ -26,25 +55,7 @@ class Project(models.Model):
         verbose_name_plural = 'Проекты'
 
     def __str__(self):
-        return self.title
-
-class Participation(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE, 
-        related_name='participations'
-    )
-    project = models.ForeignKey(
-        Project, 
-        on_delete=models.CASCADE, 
-        related_name='participants'
-    )
-    joined_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('user', 'project')
-        verbose_name = 'Участие'
-        verbose_name_plural = 'Участия'
+        return self.name
 
 class Favorite(models.Model):
     user = models.ForeignKey(
@@ -63,3 +74,6 @@ class Favorite(models.Model):
         unique_together = ('user', 'project')
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
+
+    def __str__(self):
+        return f'{self.user.email} favorited {self.project.name}'

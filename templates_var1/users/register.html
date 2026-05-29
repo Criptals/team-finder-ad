@@ -10,54 +10,62 @@
 {% block content %}
 <div class="auth-card">
     <h2>Регистрация</h2>
-    <form method="post" enctype="multipart/form-data">
+    <form method="post">
         {% csrf_token %}
-        
+
         <div class="name-fields">
             <div>
-                {{ form.first_name.label_tag }} 
-                {{ form.first_name }}
-                {% if form.first_name.errors %}
-                    <span style="color: red;">{{ form.first_name.errors }}</span>
+                {{ form.name.label_tag }}
+                {{ form.name }}
+                {% if form.name.errors %}
+                <span style="color: red;">{{ form.name.errors }}</span>
                 {% endif %}
             </div>
             <div>
-                {{ form.last_name.label_tag }} 
-                {{ form.last_name }}
-                {% if form.last_name.errors %}
-                    <span style="color: red;">{{ form.last_name.errors }}</span>
+                {{ form.surname.label_tag }}
+                {{ form.surname }}
+                {% if form.surname.errors %}
+                <span style="color: red;">{{ form.surname.errors }}</span>
                 {% endif %}
             </div>
         </div>
 
         <div>
-            {{ form.email.label_tag }} 
+            {{ form.email.label_tag }}
             {{ form.email }}
             {% if form.email.errors %}
-                <span style="color: red;">{{ form.email.errors }}</span>
+            <span style="color: red;">{{ form.email.errors }}</span>
             {% endif %}
         </div>
 
         <div>
-            {{ form.password1.label_tag }} 
+            {{ form.phone.label_tag }}
+            {{ form.phone }}
+            {% if form.phone.errors %}
+            <span style="color: red;">{{ form.phone.errors }}</span>
+            {% endif %}
+        </div>
+
+        <div>
+            {{ form.password1.label_tag }}
             {{ form.password1 }}
             {% if form.password1.errors %}
-                <span style="color: red;">{{ form.password1.errors }}</span>
+            <span style="color: red;">{{ form.password1.errors }}</span>
             {% endif %}
         </div>
 
         <div>
-            {{ form.password2.label_tag }} 
+            {{ form.password2.label_tag }}
             {{ form.password2 }}
             {% if form.password2.errors %}
-                <span style="color: red;">{{ form.password2.errors }}</span>
+            <span style="color: red;">{{ form.password2.errors }}</span>
             {% endif %}
         </div>
 
         {% if form.non_field_errors %}
-            <div style="color: red; margin-bottom: 10px;">
-                {{ form.non_field_errors }}
-            </div>
+        <div style="color: red; margin-bottom: 10px;">
+            {{ form.non_field_errors }}
+        </div>
         {% endif %}
 
         <button type="submit">Зарегистрироваться</button>

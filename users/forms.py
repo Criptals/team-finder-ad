@@ -1,19 +1,28 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import CustomUser
+from django.contrib.auth.forms import UserCreationForm
+from .models import User
 
 class RegisterForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
-        model = CustomUser
-        fields = ('first_name', 'last_name', 'email', 'password1', 'password2')
+    class Meta:
+        model = User
+        fields = ('email', 'name', 'surname', 'phone', 'password1', 'password2')
 
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if CustomUser.objects.filter(email=email).exists():
-            raise forms.ValidationError("Этот email уже зарегистрирован.")
-        return email
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update({
+                'class': 'form-control',
+                'placeholder': self.fields[field_name].label or field_name
+            })
 
 class ProfileEditForm(forms.ModelForm):
     class Meta:
-        model = CustomUser
-        fields = ('first_name', 'last_name', 'bio', 'avatar', 'phone', 'github')
+        model = User
+        fields = ('name', 'surname', 'about', 'phone', 'github_url', 'avatar')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update({
+                'class': 'form-control'
+            })

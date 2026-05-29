@@ -4,15 +4,15 @@
     <div class="project-card-header-title">
         <div class="project-card-header">
             <div class="project-owner-grid">
-                {% if project.author.avatar %}
-                    <img src="{{ project.author.avatar.url }}" alt="Аватар" class="avatar">
+                {% if project.owner.avatar %}
+                <img src="{{ project.owner.avatar.url }}" alt="Аватар" class="avatar">
                 {% else %}
-                    <img src="{% static 'images/default-avatar.png' %}" alt="Аватар по умолчанию" class="avatar">
+                <img src="{% static 'images/default-avatar.png' %}" alt="Аватар по умолчанию" class="avatar">
                 {% endif %}
-                
+
                 <div class="project-owner">
-                    <a href="{% url 'users:public_profile' pk=project.author.pk %}">
-                        {{ project.author.first_name }} {{ project.author.last_name }}
+                    <a href="{% url 'users:public_profile' pk=project.owner.pk %}">
+                        {{ project.owner.name }} {{ project.owner.surname }}
                     </a>
                     <small class="project-date">{{ project.created_at|date:"d.m.Y" }}</small>
                 </div>
@@ -21,10 +21,12 @@
             {% if user.is_authenticated %}
             <form method="post" action="{% url 'projects:toggle_favorite' pk=project.pk %}" style="display: inline;">
                 {% csrf_token %}
-                <button type="submit" 
-                        class="project-fav-icon {% if project in user.favorites.all %}favorite{% else %}not-favorite{% endif %}"
-                        title="Добавить в избранное"
-                        style="background: none; border: none; cursor: pointer; padding: 0;">
+                <button type="submit"
+                    class="project-fav-icon {% if project in user.favorites.all %}favorite{% else %}not-favorite{% endif %}"
+                    title="Добавить в избранное" 
+                    data-project-id="{{ project.pk }}"
+                    data-fav="{% if project in user.favorites.all %}true{% else %}false{% endif %}"
+                    style="background: none; border: none; cursor: pointer; padding: 0;">
                     {% include 'includes/svg/heart.html' %}
                 </button>
             </form>
@@ -32,7 +34,7 @@
         </div>
 
         <h3 class="project-card-title">
-            <a href="{% url 'projects:detail' pk=project.pk %}">{{ project.title }}</a>
+            <a href="{% url 'projects:detail' pk=project.pk %}">{{ project.name }}</a>
         </h3>
     </div>
 
@@ -40,30 +42,23 @@
 
     <div class="project-card-footer">
         <span class="project-status-black">
-            {% if project.status == "SEARCH" %}
-                Поиск участников
-            {% elif project.status == "IN_PROGRESS" %}
-                В разработке
-            {% elif project.status == "COMPLETED" %}
-                Завершен
+            {% if project.status == 'open' %}
+                Open
+            {% elif project.status == 'closed' %}
+                Closed
             {% else %}
-                {{ project.status }}
+                {{ project.get_status_display }}
             {% endif %}
         </span>
-        
+
+        {# Исправленный блок склонения участников #}
         {% with count=project.participants.count %}
         <div class="project-participants">
             {% include 'includes/svg/participants.html' %}
-            {{ count }}
-            {% if count|add:'-11'|divisibleby:100 or count|add:'-12'|divisibleby:100 or count|add:'-13'|divisibleby:100 or count|add:'-14'|divisibleby:100 %}
-                участников
-            {% elif count|add:'-1'|divisibleby:10 %}
-                участник
-            {% elif count|add:'-2'|divisibleby:10 or count|add:'-3'|divisibleby:10 or count|add:'-4'|divisibleby:10 %}
-                участника
-            {% else %}
-                участников
-            {% endif %}
+            {% with count=project.participants.count %}
+                {{ count }}
+                {% if count|add:"-11"|divisibleby:100 or count|add:"-12"|divisibleby:100 or count|add:"-13"|divisibleby:100 or count|add:"-14"|divisibleby:100 %}участников{% elif count|add:"-1"|divisibleby:10 %}участник{% elif count|add:"-2"|divisibleby:10 or count|add:"-3"|divisibleby:10 or count|add:"-4"|divisibleby:10 %}участника{% else %}участников{% endif %}
+            {% endwith %}
         </div>
         {% endwith %}
     </div>

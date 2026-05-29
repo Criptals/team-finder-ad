@@ -1,16 +1,14 @@
 from django.contrib import admin
-from .models import Project, Participation, Favorite
+from users.models import User 
+from .models import Project, Favorite
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'status', 'created_at')
+    list_display = ('name', 'owner', 'status', 'created_at')
     list_filter = ('status', 'created_at')
-    search_fields = ('title', 'description')
-
-@admin.register(Participation)
-class ParticipationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'project', 'joined_at')
+    search_fields = ('name', 'description')
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'project', 'added_at')
+    list_filter = ('added_at',)
