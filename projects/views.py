@@ -1,13 +1,14 @@
-from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy
 from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 
-from .models import Project, Favorite
 from .forms import ProjectForm
+from .models import Project
 
-USERS_PER_PAGE=12
+USERS_PER_PAGE = 12
+
 
 class ProjectListView(ListView):
     model = Project
@@ -17,6 +18,7 @@ class ProjectListView(ListView):
 
     def get_queryset(self):
         return Project.objects.select_related('owner').prefetch_related('participants').all()
+
 
 class ProjectDetailView(DetailView):
     model = Project
@@ -29,17 +31,18 @@ class ProjectDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        
+
         if user.is_authenticated:
-            context['is_favorite'] = Favorite.objects.filter(user=user, project=self.object).exists()
-            context['is_participant'] = user in self.object.participants.all()
-            context['is_owner'] = (self.object.owner == user)
+            context['is_favorite'] = self.object.favorites.filter(pk=user.pk).exists()
+            context['is_participant'] = self.object.participants.filter(pk=user.pk).exists()
+            context['is_owner'] = self.object.owner == user
         else:
             context['is_favorite'] = False
             context['is_participant'] = False
             context['is_owner'] = False
-            
+
         return context
+
 
 class ProjectCreateView(LoginRequiredMixin, CreateView):
     model = Project
@@ -53,6 +56,7 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy('projects:detail', kwargs={'pk': self.object.pk})
 
+
 class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Project
     form_class = ProjectForm
@@ -65,40 +69,43 @@ class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('projects:detail', kwargs={'pk': self.object.pk})
 
+
 class JoinProjectView(LoginRequiredMixin, View):
     def post(self, request, pk):
         project = get_object_or_404(Project.objects.select_related('owner'), pk=pk)
-        
+
         if project.status != Project.Status.OPEN:
             raise Http404('К этому проекту нельзя присоединиться')
-        
+
         if request.user in project.participants.all():
             project.participants.remove(request.user)
         else:
             project.participants.add(request.user)
-            
+
         return redirect('projects:detail', pk=pk)
+
 
 class ToggleFavoriteView(LoginRequiredMixin, View):
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
-        favorite, created = Favorite.objects.get_or_create(user=request.user, project=project)
-        if not created:
-            favorite.delete()
+        if project.favorites.filter(pk=request.user.pk).exists():
+            project.favorites.remove(request.user)
+        else:
+            project.favorites.add(request.user)
         return redirect('projects:detail', pk=pk)
 
 
 class ProjectCompleteView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
-        project.status = 'closed'
+        project.status = Project.Status.CLOSED
         project.save()
         return redirect('projects:detail', pk=pk)
 
     def test_func(self):
         project = get_object_or_404(Project, pk=self.kwargs['pk'])
         return self.request.user == project.owner
-    
+
 
 class FavoriteListView(LoginRequiredMixin, ListView):
     model = Project
@@ -108,5 +115,5 @@ class FavoriteListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Project.objects.filter(
-            favorited_by__user=self.request.user
-        ).select_related('owner').prefetch_related('participants').order_by('-id')
+            favorites=self.request.user
+        ).select_related('owner').prefetch_related('participants')

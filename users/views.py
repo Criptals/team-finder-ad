@@ -1,13 +1,15 @@
 import logging
-from django.views.generic import CreateView, UpdateView, DetailView, ListView
-from django.urls import reverse_lazy
-from django.shortcuts import redirect
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import get_user_model
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
+
+from .forms import ProfileEditForm, RegisterForm
 from .models import User
-from .forms import RegisterForm, ProfileEditForm
 from .utils import generate_avatar
+
 USERS_PER_PAGE = 12
 
 FILTER_OWNERS_FAVORITE = 'owners-of-favorite-projects'

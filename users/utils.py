@@ -1,6 +1,8 @@
 import os
-from PIL import Image, ImageDraw, ImageFont
+
 from django.conf import settings
+from PIL import Image, ImageDraw, ImageFont
+
 
 def generate_avatar(text, save_path_relative):
     if not text:
